@@ -4,8 +4,12 @@
   "description": "takes screenshots of n8n application",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Mutasem Aldmour",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "puppeteer": "^10.4.0"
+  }
 }
