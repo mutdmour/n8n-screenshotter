@@ -14,6 +14,8 @@ const browser = puppeteer.launch({
 	}
 });
 
+const cache = {};
+
 const asyncWrap = fn =>
   function asyncUtilWrap (req, res, next, ...args) {
     const fnReturn = fn(req, res, next, ...args)
@@ -31,39 +33,44 @@ router.post('/capture', asyncWrap(async (req, res, next) => {
 		throw new Error('Must have an array of nodes');
 	}
 
-	const page = await (await browser).newPage();
-	await page.setRequestInterception(true);
+	const cacheKey = JSON.stringify(workflow);
 
-	page.on('request', (interceptedRequest) => {
-		if (interceptedRequest.url().startsWith('https://api.n8n.io/workflows/templates/')) {
-			interceptedRequest.respond({
-				headers: {
-					'access-control-allow-origin': '*',
-				},
-				contentType: 'application/json',
-				body: JSON.stringify({id: 1, name: 'test', workflow}),
-			});
+	if (!cache[cacheKey]) {
+		const page = await (await browser).newPage();
+		await page.setRequestInterception(true);
 
-			return;
-		}
+		page.on('request', (interceptedRequest) => {
+			if (interceptedRequest.url().startsWith('https://api.n8n.io/workflows/templates/')) {
+				interceptedRequest.respond({
+					headers: {
+						'access-control-allow-origin': '*',
+					},
+					contentType: 'application/json',
+					body: JSON.stringify({id: 1, name: 'test', workflow}),
+				});
 
-		interceptedRequest.continue();
-	});
+				return;
+			}
 
-	await page.goto('https://n8n-mutasem.herokuapp.com/workflows/templates/1149');
+			interceptedRequest.continue();
+		});
 
-	await page.waitForSelector('div.el-loading-mask', {hidden: true});
+		await page.goto('https://n8n-mutasem.herokuapp.com/workflows/templates/1149');
 
-	const name = uuid.v4();
-	const imagePath = `output/${name}.png`;
-	await page.screenshot({ path: imagePath });
+		await page.waitForSelector('div.el-loading-mask', {hidden: true});
 
-	const result = await uploader.upload(path.resolve(__dirname, '..', imagePath));
+		const name = uuid.v4();
+		const imagePath = `output/${name}.png`;
+		await page.screenshot({ path: imagePath });
+
+		const result = await uploader.upload(path.resolve(__dirname, '..', imagePath));
+		cache[cacheKey] = result.Location;
+	}
 
 	res.status(200);
 
 	res.send({
-		imageUrl: result.Location,
+		imageUrl: cache[cacheKey],
 	});
 }));
 
