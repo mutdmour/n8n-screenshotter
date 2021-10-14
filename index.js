@@ -1,76 +1,38 @@
-const puppeteer = require('puppeteer');
+const express = require('express'),
+    bodyParser = require('body-parser'),
+    cors = require('cors');
 
-const workflow = {
-  "name": "My workflow 6",
-  "nodes": [
-    {
-      "parameters": {},
-      "name": "Start",
-      "type": "n8n-nodes-base.start",
-      "typeVersion": 1,
-      "position": [
-        250,
-        300
-      ]
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "name": "Set",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 1,
-      "position": [
-        460,
-        220
-      ]
-    }
-  ],
-  "connections": {
-    "Start": {
-      "main": [
-        [
-          {
-            "node": "Set",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
-  },
-  "active": false,
-  "settings": {},
-  "id": 1123
-};
+// const isProduction = process.env.NODE_ENV === 'production';
 
-(async () => {
-  const browser = await puppeteer.launch({headless: false});
-  const page = await browser.newPage();
-	await page.setRequestInterception(true);
+const app = express();
 
-	page.on('request', (interceptedRequest) => {
-    if (interceptedRequest.url().startsWith('https://api.n8n.io/workflows/templates/')) {
-			console.log('intercepted');
-			interceptedRequest.respond({
-				headers: {
-					'access-control-allow-origin': '*',
-				},
-				contentType: 'application/json',
-				body: JSON.stringify({id: 1, name: 'test', workflow}),
-			});
+app.use(cors());
 
-      return;
-    }
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-    interceptedRequest.continue();
-  });
+// app.use(express.static(__dirname + '/public'));
 
-  await page.goto('http://localhost:5678/workflows/templates/1149');
+app.use(require('./src/routes'));
 
-	await page.waitForSelector('div.el-loading-mask', {hidden: true});
+app.use(function(req, res, next) {
+  const err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
 
-  await page.screenshot({ path: 'example.png' });
+app.use(function (err, req, res, next) {
+	console.log(err);
+  if (res.headersSent) {
+    return next(err)
+  }
+  res.status(500)
 
-  // await browser.close();
-})();
+  res.send(err.message);
+});
+
+const server = app.listen( process.env.PORT || 3000, function(){
+  console.log('Listening on port ' + server.address().port);
+});
+
+module.exports = app;
