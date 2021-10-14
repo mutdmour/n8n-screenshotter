@@ -6,7 +6,7 @@ const puppeteer = require('puppeteer');
 const uploader = require('./uploader');
 const browser = puppeteer.launch({
 	headless: true,
-	args: [`--window-size=1920,1080`],
+	args: [`--window-size=1920,1080`, '--no-sandbox', '--disable-setuid-sandbox'],
 	defaultViewport: {
 		width:1920,
 		height:1080,
