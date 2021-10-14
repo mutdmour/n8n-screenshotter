@@ -16,7 +16,9 @@ services:
     command: /bin/sh -c "n8n start"
 
   screenshotter:
-    command: bash -c "npm install && npm start"
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
