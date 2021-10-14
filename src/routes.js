@@ -1,7 +1,9 @@
 const router = require('express').Router();
 const uuid = require('uuid');
+const path = require('path');
 
 const puppeteer = require('puppeteer');
+const uploader = require('./uploader');
 const browser = puppeteer.launch({headless: true});
 
 const asyncWrap = fn =>
@@ -11,7 +13,6 @@ const asyncWrap = fn =>
   }
 
 router.post('/capture', asyncWrap(async (req, res, next) => {
-	console.log(req.body);
 	const workflow = req.body.workflow;
 
 	if (!workflow) {
@@ -46,9 +47,16 @@ router.post('/capture', asyncWrap(async (req, res, next) => {
 	await page.waitForSelector('div.el-loading-mask', {hidden: true});
 
 	const name = uuid.v4();
-	await page.screenshot({ path: `output/${name}.png` });
+	const imagePath = `output/${name}.png`;
+	await page.screenshot({ path: imagePath });
 
-	res.sendStatus(200);
+	const result = await uploader.upload(path.resolve(__dirname, '..', imagePath));
+
+	res.status(200);
+
+	res.send({
+		imageUrl: result.Location,
+	});
 }));
 
 module.exports = router;
