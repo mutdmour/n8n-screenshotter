@@ -60,11 +60,12 @@ router.post('/capture', asyncWrap(async (req, res, next) => {
 		await page.waitForSelector('div.el-loading-mask', {hidden: true});
 
 		const name = uuid.v4();
-		const imagePath = `output/${name}.png`;
+		const imagePath = `public/${name}.png`;
 		await page.screenshot({ path: imagePath });
 
-		const result = await uploader.upload(path.resolve(__dirname, '..', imagePath));
-		cache[cacheKey] = result.Location;
+		// const result = await uploader.upload(path.resolve(__dirname, '..', imagePath));
+		// cache[cacheKey] = result.Location;
+		cache[cacheKey] = `/${name}.png`;
 	}
 
 	res.status(200);
