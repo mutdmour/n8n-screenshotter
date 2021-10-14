@@ -5,12 +5,19 @@ services:
   n8n:
     image: n8nio/n8n
     restart: always
-    environment:
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER
-      - N8N_BASIC_AUTH_PASSWORD
+    # environment:
+    #   - N8N_BASIC_AUTH_ACTIVE=true
+    #   - N8N_BASIC_AUTH_USER
+    #   - N8N_BASIC_AUTH_PASSWORD
     ports:
       - 5678:5678
     volumes:
       - ~/.n8n:/home/node/.n8n
     command: /bin/sh -c "n8n start"
+
+  screenshotter:
+    command: bash -c "npm install && npm start"
+    environment:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+
