@@ -5,11 +5,12 @@ const path = require('path');
 const puppeteer = require('puppeteer');
 const uploader = require('./uploader');
 const browser = puppeteer.launch({
-	headless: false,
+	headless: true,
 	args: [`--window-size=1920,1080`],
 	defaultViewport: {
 		width:1920,
-		height:1080
+		height:1080,
+		deviceScaleFactor: 2,
 	}
 });
 
