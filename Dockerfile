@@ -6,11 +6,11 @@ RUN apt install -y libgconf-2-4 libatk1.0-0 libatk-bridge2.0-0 libgdk-pixbuf2.0-
 
 WORKDIR /app
 
-COPY package*.json ./
+# COPY package*.json ./
 
 RUN npm install
 
-COPY . .
+# COPY . .
 
 EXPOSE 3000
 
