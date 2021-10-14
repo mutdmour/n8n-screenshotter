@@ -42,7 +42,7 @@ router.post('/capture', asyncWrap(async (req, res, next) => {
 		interceptedRequest.continue();
 	});
 
-	await page.goto('http://localhost:5678/workflows/templates/1149');
+	await page.goto('https://n8n-mutasem.herokuapp.com/workflows/templates/1149');
 
 	await page.waitForSelector('div.el-loading-mask', {hidden: true});
 
